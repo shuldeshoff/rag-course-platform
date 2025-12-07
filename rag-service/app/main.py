@@ -14,17 +14,22 @@ from app.services.qdrant_service import qdrant_service
 from app.services.yandex_service import yandex_service
 from app.services.rag_pipeline import rag_pipeline
 from app.database.db import init_db
+from app.utils.rate_limiter import rate_limit_user
+from app.utils.cache import cache_service
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown events"""
     # Startup
-    print("🚀 Initializing RAG Course Platform...")
+    logger.info("startup", message="Initializing RAG Course Platform")
     init_db()
-    print("✅ Database initialized")
+    logger.info("startup", message="Database initialized")
     yield
     # Shutdown
-    print("👋 Shutting down...")
+    logger.info("shutdown", message="Shutting down")
 
 app = FastAPI(
     title="RAG Course Platform API",
@@ -87,8 +92,29 @@ async def ask_question(
     """
     Ask a question about the course using RAG pipeline
     Requires Bearer token authentication
+    Rate limited per user
     """
+    # Rate limiting
+    await rate_limit_user(None, request.user_id)
+    
+    # Check cache
+    cached = cache_service.get_answer_cache(request.question, request.course_id)
+    if cached:
+        logger.info(
+            "cache_hit",
+            user_id=request.user_id,
+            course_id=request.course_id
+        )
+        return AskResponse(**cached)
+    
     try:
+        logger.info(
+            "ask_question",
+            user_id=request.user_id,
+            course_id=request.course_id,
+            question_length=len(request.question)
+        )
+        
         # Use full RAG pipeline
         answer, chunks, response_time_ms = await rag_pipeline.process(
             question=request.question,
@@ -96,14 +122,35 @@ async def ask_question(
             top_k=5
         )
         
-        return AskResponse(
-            status="success",
-            answer=answer,
-            chunks_used=chunks,
-            response_time_ms=response_time_ms
+        result = {
+            "status": "success",
+            "answer": answer,
+            "chunks_used": chunks,
+            "response_time_ms": response_time_ms
+        }
+        
+        # Cache result
+        cache_service.set_answer_cache(request.question, request.course_id, result)
+        
+        logger.info(
+            "ask_success",
+            user_id=request.user_id,
+            course_id=request.course_id,
+            response_time_ms=response_time_ms,
+            chunks_count=len(chunks)
         )
+        
+        return AskResponse(**result)
     
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.error(
+            "ask_error",
+            user_id=request.user_id,
+            course_id=request.course_id,
+            error=str(e)
+        )
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/test-qdrant")

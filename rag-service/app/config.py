@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
     
+    # Redis Settings
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    
     # Embeddings Settings
     EMBEDDING_MODEL: str = "intfloat/multilingual-e5-large"
     CHUNK_SIZE: int = 500
@@ -35,6 +39,13 @@ class Settings(BaseSettings):
     MAX_CHUNKS: int = 5
     MAX_CONTEXT_LENGTH: int = 3000
     REQUEST_TIMEOUT: int = 30
+    
+    # Rate Limiting
+    RATE_LIMIT_PER_MINUTE: int = 10
+    
+    # Caching
+    CACHE_ENABLED: bool = True
+    CACHE_TTL: int = 1800
     
     class Config:
         env_file = ".env"
