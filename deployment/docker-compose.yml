@@ -25,7 +25,9 @@ services:
 
   # RAG Service
   rag-service:
-    build: /opt/rag-course-platform/rag-service
+    build:
+      context: ./rag-service
+      dockerfile: Dockerfile
     container_name: rag-service
     restart: unless-stopped
     ports:
@@ -49,7 +51,7 @@ services:
       - REDIS_PORT=6379
     volumes:
       - rag_uploads:/app/uploads
-      - /opt/rag-course-platform/course-materials:/app/course-materials:ro
+      - ./course-materials:/app/course-materials:ro
     depends_on:
       postgres:
         condition: service_healthy
