@@ -1,0 +1,81 @@
+.block-aiassistant-chat {
+    padding: 10px;
+}
+
+.block-aiassistant-chat .chat-header {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.block-aiassistant-chat .chat-header h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.block-aiassistant-chat .question-area {
+    margin-bottom: 10px;
+}
+
+.block-aiassistant-chat textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.block-aiassistant-chat .submit-area {
+    margin-bottom: 15px;
+}
+
+.block-aiassistant-chat .answer-area {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.block-aiassistant-chat .answer-header {
+    margin-bottom: 10px;
+    color: #007bff;
+}
+
+.block-aiassistant-chat .answer-content {
+    line-height: 1.6;
+}
+
+.block-aiassistant-chat .chunks-info {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #dee2e6;
+    color: #6c757d;
+}
+
+.block-aiassistant-chat .loading-area {
+    margin-top: 15px;
+    text-align: center;
+    padding: 15px;
+    color: #666;
+}
+
+.block-aiassistant-chat .loading-area .spinner-border {
+    margin-right: 8px;
+}
+
+.block-aiassistant-chat .error-area {
+    margin-top: 15px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .block-aiassistant-chat textarea {
+        font-size: 14px;
+    }
+    
+    .block-aiassistant-chat .answer-area {
+        padding: 10px;
+        font-size: 14px;
+    }
+}
+

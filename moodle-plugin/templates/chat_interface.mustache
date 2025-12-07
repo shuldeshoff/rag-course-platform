@@ -1,0 +1,47 @@
+{{!
+    AI Assistant chat interface template
+}}
+<div class="block-aiassistant-chat">
+    <div class="chat-header">
+        <h4>🤖 {{asklabel}}</h4>
+    </div>
+    
+    <div class="chat-body">
+        <div class="question-area">
+            <textarea 
+                id="aiassistant-question-{{courseid}}"
+                class="form-control"
+                placeholder="{{placeholder}}"
+                rows="3"
+            ></textarea>
+        </div>
+        
+        <div class="submit-area">
+            <button 
+                id="aiassistant-submit-{{courseid}}"
+                class="btn btn-primary"
+            >
+                {{submitlabel}}
+            </button>
+        </div>
+        
+        <div class="answer-area" id="aiassistant-answer-{{courseid}}" style="display:none;">
+            <div class="answer-header">
+                <strong>💬 Ответ:</strong>
+            </div>
+            <div class="answer-content"></div>
+        </div>
+        
+        <div class="loading-area" id="aiassistant-loading-{{courseid}}" style="display:none;">
+            <div class="spinner-border spinner-border-sm" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <span>Обработка...</span>
+        </div>
+        
+        <div class="error-area" id="aiassistant-error-{{courseid}}" style="display:none;">
+            <div class="alert alert-danger" role="alert"></div>
+        </div>
+    </div>
+</div>
+
