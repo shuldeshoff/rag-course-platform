@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  rag-service:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - API_TOKEN=${API_TOKEN}
+      - YANDEX_API_KEY=${YANDEX_API_KEY}
+      - YANDEX_FOLDER_ID=${YANDEX_FOLDER_ID}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - QDRANT_HOST=qdrant
+    depends_on:
+      - postgres
+      - qdrant
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=rag_service
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  qdrant:
+    image: qdrant/qdrant:v1.7.4
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  redis_data:
+
