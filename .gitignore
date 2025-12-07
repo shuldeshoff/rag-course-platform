@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# FastAPI / Uvicorn
+.env
+.env.local
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite3
+
+# Docker
+*.pid
+
+# Qdrant
+qdrant_data/
+
+# Uploads
+uploads/
+temp/
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Moodle
+moodledata/
+
