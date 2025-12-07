@@ -9,6 +9,7 @@ import time
 from app.models.request import AskRequest
 from app.models.response import AskResponse, HealthResponse, ErrorResponse
 from app.api.auth import verify_token
+from app.api.admin import router as admin_router
 from app.services.qdrant_service import qdrant_service
 from app.services.yandex_service import yandex_service
 from app.services.rag_pipeline import rag_pipeline
@@ -31,6 +32,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# Include routers
+app.include_router(admin_router)
 
 # CORS middleware
 app.add_middleware(
