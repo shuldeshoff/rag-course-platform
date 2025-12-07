@@ -1,39 +1,31 @@
-version: '3.8'
+version: '3.9'
 
 services:
-  # Moodle Application
+  # Moodle Web Server
   moodle:
-    image: bitnami/moodle:4.3
+    image: moodlehq/moodle-php-apache:latest
     container_name: moodle
     restart: unless-stopped
     ports:
-      - "8080:8080"
-    environment:
-      - MOODLE_DATABASE_TYPE=pgsql
-      - MOODLE_DATABASE_HOST=postgres
-      - MOODLE_DATABASE_PORT_NUMBER=5432
-      - MOODLE_DATABASE_NAME=moodle
-      - MOODLE_DATABASE_USER=${MOODLE_DB_USER}
-      - MOODLE_DATABASE_PASSWORD=${MOODLE_DB_PASSWORD}
-      - MOODLE_USERNAME=${MOODLE_ADMIN_USER}
-      - MOODLE_PASSWORD=${MOODLE_ADMIN_PASSWORD}
-      - MOODLE_EMAIL=${MOODLE_ADMIN_EMAIL}
-      - MOODLE_SITE_NAME=RAG Course Platform
-      - MOODLE_SKIP_BOOTSTRAP=no
-      - MOODLE_HOST=ragcourse.ru
-      - MOODLE_REVERSEPROXY=yes
-      - MOODLE_SSLPROXY=yes
+      - "8080:80"
     volumes:
-      - moodle_data:/bitnami/moodle
-      - moodledata:/bitnami/moodledata
+      - ./moodle:/var/www/html
+      - ./moodledata:/var/www/moodledata
+    environment:
+      - MOODLE_DOCKER_DBTYPE=pgsql
+      - MOODLE_DOCKER_DBHOST=postgres
+      - MOODLE_DOCKER_DBNAME=moodle
+      - MOODLE_DOCKER_DBUSER=moodle
+      - MOODLE_DOCKER_DBPASS=${MOODLE_DB_PASSWORD}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - rag_network
 
   # RAG Service
   rag-service:
-    build: ./rag-service
+    build: /opt/rag-course-platform/rag-service
     container_name: rag-service
     restart: unless-stopped
     ports:
@@ -55,20 +47,16 @@ services:
       - QDRANT_COLLECTION=course_materials
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - EMBEDDING_MODEL=intfloat/multilingual-e5-large
-      - CHUNK_SIZE=500
-      - CHUNK_OVERLAP=50
-      - MAX_CHUNKS=5
-      - REQUEST_TIMEOUT=30
-      - RATE_LIMIT_PER_MINUTE=10
-      - CACHE_ENABLED=true
-      - CACHE_TTL=1800
     volumes:
       - rag_uploads:/app/uploads
+      - /opt/rag-course-platform/course-materials:/app/course-materials:ro
     depends_on:
-      - postgres
-      - qdrant
-      - redis
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      redis:
+        condition: service_started
     networks:
       - rag_network
 
@@ -100,15 +88,8 @@ services:
       - "6333:6333"
     volumes:
       - qdrant_data:/qdrant/storage
-    environment:
-      - QDRANT__SERVICE__GRPC_PORT=6334
     networks:
       - rag_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/readiness"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   # Redis Cache
   redis:
@@ -122,27 +103,13 @@ services:
     command: redis-server --appendonly yes
     networks:
       - rag_network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 volumes:
-  moodle_data:
-    driver: local
-  moodledata:
-    driver: local
   postgres_data:
-    driver: local
   qdrant_data:
-    driver: local
   redis_data:
-    driver: local
   rag_uploads:
-    driver: local
 
 networks:
   rag_network:
     driver: bridge
-
