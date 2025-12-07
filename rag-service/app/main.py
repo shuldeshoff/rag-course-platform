@@ -11,6 +11,7 @@ from app.models.response import AskResponse, HealthResponse, ErrorResponse
 from app.api.auth import verify_token
 from app.services.qdrant_service import qdrant_service
 from app.services.yandex_service import yandex_service
+from app.services.rag_pipeline import rag_pipeline
 from app.database.db import init_db
 
 @asynccontextmanager
@@ -80,22 +81,22 @@ async def ask_question(
     token: str = Depends(verify_token)
 ):
     """
-    Ask a question about the course
+    Ask a question about the course using RAG pipeline
     Requires Bearer token authentication
     """
-    start_time = time.time()
-    
     try:
-        # Для MVP без RAG - просто отправляем в YandexGPT
-        answer = await yandex_service.generate(request.question)
-        
-        response_time = int((time.time() - start_time) * 1000)
+        # Use full RAG pipeline
+        answer, chunks, response_time_ms = await rag_pipeline.process(
+            question=request.question,
+            course_id=request.course_id,
+            top_k=5
+        )
         
         return AskResponse(
             status="success",
             answer=answer,
-            chunks_used=[],
-            response_time_ms=response_time
+            chunks_used=chunks,
+            response_time_ms=response_time_ms
         )
     
     except Exception as e:

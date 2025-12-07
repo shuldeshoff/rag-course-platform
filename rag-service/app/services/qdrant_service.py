@@ -17,11 +17,13 @@ class QdrantService:
     
     def _ensure_collection(self):
         """Create collection if not exists"""
+        from app.services.embedder import embedder_service
         collections = self.client.get_collections().collections
         if not any(c.name == self.collection_name for c in collections):
+            vector_size = embedder_service.dimension
             self.client.create_collection(
                 collection_name=self.collection_name,
-                vectors_config=VectorParams(size=1024, distance=Distance.COSINE)
+                vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE)
             )
     
     def search(self, vector: list, course_id: int, limit: int = 5):
